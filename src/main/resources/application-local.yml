@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: blogex
+  jackson:
+    date-format: "yyyy-MM-dd'T'HH:mm:ssXXX"
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: "America/Sao_Paulo"
+  hateoas:
+    use-hal-as-default-json-media-type: false
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/blogex}
+      username: ${MONGO_INITDB_ROOT_USERNAME:root}
+      password: ${MONGO_INITDB_ROOT_PASSWORD:12345}
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id:
+            client-secret:
+            scope: user:email
+
+# Springdoc OpenApi 3.1 & Swagger 3
+springdoc:
+  packagesToScan: org.murilonerdx.blogex.application.controller
+  swagger-ui:
+    path: /docs-blogex.html
+  api-docs:
+    path: /docs-blogex
