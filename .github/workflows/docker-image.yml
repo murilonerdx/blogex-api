@@ -1,0 +1,52 @@
+name: Docker Image CI
+permissions:
+  contents: read
+  packages: write
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: 12345
+          MONGO_INITDB_DATABASE: blogex
+        # Removendo a opção options para simplificar e ver se resolve o problema de inicialização.
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag blogex:latest
+
+      - name: Run container from the image
+        run: |
+          docker run --name app -d blogex:latest
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract tag name
+        id: tag_name
+        run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/blogex:latest
